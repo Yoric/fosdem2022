@@ -410,8 +410,17 @@ by keywords, etc.
 
 ## Conclusions
 
+- Moderating federated communications isn't trivial but the tools are available.
 
-These slides are available at https://yoric.github.io/fosdem2022/
+- More tools coming!
+
+---
+
+## Links
+
+- [Mjölnir](https://github.com/matrix-org/mjolnir)
+
+- [These slides](https://yoric.github.io/fosdem2022/talk.html)
 
 ---
 

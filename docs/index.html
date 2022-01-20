@@ -2,17 +2,426 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>reveal-md</title>
-    <link rel="stylesheet" href="./dist/theme/black.css" id="theme" />
-  </head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
+    <title>reveal-md</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="./dist/reset.css" />
+    <link rel="stylesheet" href="./dist/reveal.css" />
+    <link rel="stylesheet" href="./dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="./css/highlight/zenburn.css" />
+
+
+  </head>
   <body>
-    <ul>
-      <li>
-        <a href="talk.html" title="">
-          talk.html
-        </a>
-      </li>
-    </ul>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"># All about Moderation
+
+Yoric (aka David Teller), Tech Lead@Element.
+
+<aside class="notes"><p>Hi, I&#39;m Yoric, aka David. I&#39;m tech lead for moderation tools
+for the Matrix ecosystem.
+This is a <em>technical</em> presentation about <em>how</em> moderation works in Matrix.
+Matrix is federated protocol/ecosystem, so that makes things... interesting.
+Note that things are moving fast at the moment, so I hope that if I give
+this presentation once again next year, it will be quite different.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+# What *is* Moderation?
+
+> In an internet forum, a moderator is one who enforces the *rules*.
+
+(source: Wikipedia)
+
+> Matrix itself doesn't know about rules. <!-- .element: class="fragment" -->
+</script></section><section  data-markdown><script type="text/template">
+# The program
+
+1. **Room moderators**.
+2. Homeserver admins.
+3. Mjölnir.
+4. A glimpse of the future.
+
+</script></section><section  data-markdown><script type="text/template">
+## Rooms and events
+
+![A conversation](img/Conversation.png)
+</script></section><section  data-markdown><script type="text/template">
+## Everything is an event
+
+<!-- .slide: data-transition="convex-in" -->
+
+![A client sends events to its homeserver. The homeserver distributes the event to other homeservers involved in the room. Each homeserver distributes events to its clients.](img/Events.png)
+</script></section><section  data-markdown><script type="text/template">
+<!-- .slide: data-transition="convex-in" -->
+
+## View source
+
+```jsonc
+{
+  "type": "m.room.member",
+  "sender": "@alice:localhost:9999",
+  "content": {
+    "membership": "join",
+    "displayname": "Alice"
+  },
+  "state_key": "@alice:localhost:9999",
+  "origin_server_ts": 1642607768822,
+  "event_id": "$cpoQNR2VRAbElwMRdUG1N_g5EXqVwrZFAilWJEY5Wmo",
+  "room_id": "!lMJWVxQoCUKBVMspVO:localhost:9999",
+  // ...
+}
+```
+
+<aside class="notes"><p>There is something every important to understand about Matrix. Matrix is basically
+only a protocol designed to allow any number of clients and any number of servers
+to agree on an (almost) write-only log of events called a room. I&#39;m sure that
+there are some people who would define this as a blockchain. There are two kinds
+of events: <em>message events</em> and <em>state events</em>. Message events contain text, images,
+sounds, confetti, encryption challenges, etc. State events contain the configuration of
+the room, including encryption configuration, topic, aliases, etc. All participating
+servers receive all messages and state events, may decide to reject them if they do
+not respect the protocol, and redistribute the events to all clients.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## ...including power levels
+
+```jsonc
+{
+  "type": "m.room.power_levels",
+  "sender": "@alice:localhost:9999",
+  "content": {
+    "users": {
+      "@alice:localhost:9999": 100
+    },
+    "users_default": 0,
+    "events": {
+      "m.room.name": 50,
+      "m.room.power_levels": 100,
+      "m.room.history_visibility": 100,
+      "m.room.canonical_alias": 50,
+      "m.room.avatar": 50,
+      "m.room.tombstone": 100,
+      "m.room.server_acl": 100,
+      "m.room.encryption": 100
+    },
+    "events_default": 0,
+    "state_default": 50,
+    "ban": 50,
+    "kick": 50,
+    "redact": 50,
+    "invite": 0,
+    "historical": 100
+  },
+  "state_key": "",
+  "origin_server_ts": 1642607696449,
+  "event_id": "$RwuiCihM0Qw1TaRl0_wNgQ41afiKi--QYVSjLnFLgho",
+  "room_id": "!lMJWVxQoCUKBVMspVO:localhost:9999",
+  // ...
+}
+```
+
+<aside class="notes"><p>This is an example of a state event. More precisely, a PowerLevel state event. As
+you can see, this state event contains many things. It defines a <em>power level</em>
+for non-default users in the room. And it defines the minimal power level required
+to perform any number of actions, <code>@room</code>, <code>kick</code>, <code>ban</code>, <code>redact</code>, ... As everything
+else in Matrix, it&#39;s extensible.
+In Matrix being a room moderator/room admin is not a boolean. It&#39;s about having the powerlevel to
+perform specific actions - and more precisely, to send specific messages.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## Kick/Ban
+
+![Showing a user being kicked from a room](img/Kick.png)
+</script></section><section  data-markdown><script type="text/template">
+<!-- .slide: data-transition="convex-in" -->
+
+### Kick/Ban (view source)
+
+```jsonc
+{
+  "type": "m.room.member",
+  "sender": "@alice:localhost:9999",
+  "content": {
+    "reason": "Not on my turf, you're not.",
+    "membership": "leave",
+    "avatar_url": "mxc://localhost:9999/POKmwjKQknFrMBhtHZMPgqrt",
+    "displayname": "bob"
+  },
+  "state_key": "@bob:localhost:9999",
+  "origin_server_ts": 1642608702256,
+  "room_id": "!lMJWVxQoCUKBVMspVO:localhost:9999",
+  // ...
+}
+
+```
+</script></section><section  data-markdown><script type="text/template">
+### Redact
+
+![Showing a redacted (deleted) message within a conversation](img/Redact.png)
+</script></section><section  data-markdown><script type="text/template">
+<!-- .slide: data-transition="convex-in" -->
+
+### Redact (view source)
+
+
+```jsonc
+{
+  "type": "m.room.message",
+  "sender": "@bob:localhost:9999",
+  "unsigned": {
+    "redacted_because": {
+      "type": "m.room.redaction",
+      "sender": "@alice:localhost:9999",
+      "content": {
+        "reason": "Please stop spamming this room."
+      },
+      "redacts": "$tXtoIAIaLlqQaGidaLTKJS3VZjhJ7uiRR3QFv0h4tHo",
+      "origin_server_ts": 1642609195432,
+      "event_id": "$jyfeDLYtArvipySfAEHJhKIEFc5BxoO9vhbqL1VSOlA",
+      "room_id": "!lMJWVxQoCUKBVMspVO:localhost:9999",
+      // ...
+    }
+  },
+  // ...
+}
+```
+
+<aside class="notes"><p>Similarly, when a moderator or a user deletes a message,
+this is a <code>m.redact</code> event.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+### Redacted (view source)
+
+<!-- .slide: data-transition="zoom" -->
+
+```jsonc
+{
+  "type": "m.room.message",
+  "sender": "@bob:localhost:9999",
+  "unsigned": {
+    "age": 61,
+    "redacted_because": {
+      "type": "m.room.redaction",
+      "sender": "@alice:localhost:9999",
+      "content": {
+        "reason": "Please stop spamming this room."
+      },
+      "redacts": "$tXtoIAIaLlqQaGidaLTKJS3VZjhJ7uiRR3QFv0h4tHo",
+      // ...
+    }
+  },
+  // ...
+}
+```
+
+<aside class="notes"><p>When a message gets redacted, both the clients and the server remove
+it from their databases.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+### Server ACLs
+
+```jsonc
+{
+    "type": "m.room.server_acl",
+    "content": {
+        "allow": [
+            "*"
+        ],
+        "allow_ip_literals": false,
+        "deny": [
+            "*.evil.com",
+            "evil.com"
+        ]
+    },
+    "room_id": "!Cuyf34gef24t:localhost",
+    "sender": "@example:localhost",
+    "state_key": "",
+}
+```
+
+<aside class="notes"><p>Blocks servers</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+# The program
+
+1. Room moderators.
+2. **Homeserver admins**.
+3. Mjölnir.
+4. A glimpse of the future.
+
+<aside class="notes"><p>Sometimes, you don&#39;t want to eject a user from a room, you want to ban
+them from the entire server.
+Moderating a server is very different. You&#39;re targeting a <em>single server</em>,
+instead of all participants in a room.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## Bad news
+
+![This is not a Matrix standard](img/NotStandard.png) <!-- .element height="50%" width="50%" -->
+
+> Let's see how it works in Synapse. <!-- .element: class="fragment" -->
+</script></section><section  data-markdown><script type="text/template">
+## Becoming server administrator
+
+1. Create a shared secret when you setup Synapse.
+2. [`PUT /_synapse/admin/v1/register`](https://github.com/matrix-org/synapse/blob/develop/docs/admin_api/register_api.md).
+
+or
+
+1. Have an admin [`PUT /_synapse/admin/v2/users/<user_id>`](https://github.com/matrix-org/synapse/blob/develop/docs/admin_api/user_admin_api.md#create-or-modify-account).
+
+Congratulations, you're now server admin. <!-- .element: class="fragment" -->
+</script></section><section  data-markdown><script type="text/template">
+## What can you do?
+
+1. [Deactivate account](https://github.com/matrix-org/synapse/blob/develop/docs/admin_api/user_admin_api.md#deactivate-account).
+2. [Shadowban](https://github.com/matrix-org/synapse/blob/develop/docs/admin_api/user_admin_api.md#controlling-whether-a-user-is-shadow-banned).
+3. [Quarantine media](https://github.com/matrix-org/synapse/blob/develop/docs/admin_api/media_admin_api.md#quarantine-media).
+4. [Block room](https://github.com/matrix-org/synapse/blob/develop/docs/admin_api/rooms.md#block-room-api).
+5. [Delete room](https://github.com/matrix-org/synapse/blob/develop/docs/admin_api/rooms.md#block-room-api).
+6. ...
+
+
+> Only affects local users! <!-- .element: class="fragment" -->
+
+<aside class="notes"><p>You can remove an account registered on your server. Unfortunately, that&#39;s often
+not what you want because both abusive users and spambots tend to come back. That&#39;s
+why we have shadowban.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## On, and one more thing
+
+![Abuse reports go to the admin](img/ReportingToAdmin.png) <!-- .element height="70%" width="70%" -->
+</script></section><section  data-markdown><script type="text/template">
+## Abuse Reports (view source)
+
+[Receive user reports](https://github.com/matrix-org/synapse/blob/develop/docs/admin_api/event_reports.md#show-reported-events).
+
+```js
+{
+    "event_id": "$bNUFCwGzWca1meCGkjp-zwslF-GfVcXukvRLI1_FaVY",
+    "reason": "This user slapped me with a wet trout",
+    "room_id": "!ERAgBpSOcCCuTJqQPk:matrix.org",
+    "sender": "@foobar:matrix.org",
+    "user_id": "@foo:matrix.org",
+    "received_ts": 1570897107409,
+    // ...
+},
+```
+
+<aside class="notes"><p>Sadly, <em>receiving</em> user reports is not standard.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## Going *beyond* admin
+
+- Synapse supports [pluggable modules in Python](https://matrix-org.github.io/synapse/latest/modules/index.html).
+- Examples: enable/disable registrations, federation with some servers, reject known-to-be-bad links, reject messages
+by keywords, etc.
+
+
+> No content inspection in encrypted rooms. <!-- .element: class="fragment" -->
+</script></section><section  data-markdown><script type="text/template">
+# The program
+
+1. Room moderators.
+2. Homeserver admins.
+3. **Mjölnir**.
+4. A glimpse of the future.
+</script></section><section  data-markdown><script type="text/template">
+<!-- .slide: data-background-image="img/MjolnirHammer.png" data-background-size="contain" -->
+</script></section><section  data-markdown><script type="text/template">
+## Mjölnir is your ~~hammer~~ friend
+
+
+![Capture of `mjolnir help`](img/Mjolnir.png).
+</script></section><section  data-markdown><script type="text/template">
+## What can Mjölnir do?
+
+- Moderate rooms in which it is present.
+- Create a moderation room.
+- Room protections.
+- Room policy lists (*).
+- Use the admin APIs (*).
+</script></section><section  data-markdown><script type="text/template">
+## One more thing
+
+![With Mjölnir, abuse reports can show up in moderation rooms!](img/AbuseReport.png)
+</script></section><section  data-markdown><script type="text/template">
+# The program
+
+1. Room moderators.
+2. Homeserver admins.
+3. Mjölnir.
+4. **A glimpse of the future**.
+</script></section><section  data-markdown><script type="text/template">
+![I see the future](img/Future.png) <!-- .element height="50%" width="50%" -->
+</script></section><section  data-markdown><script type="text/template">
+## Decentralizing moderation
+
+![Report being routed to moderator](img/ReportingToModerator.png)  <!-- .element height="70%" width="70%" -->
+</script></section><section  data-markdown><script type="text/template">
+## But also
+
+- Undoable redactions.
+- Customizable room protections.
+- Mjölnir UI improvements.
+- ...
+</script></section><section  data-markdown><script type="text/template">
+## Conclusions
+
+- Moderating federated communications isn't trivial but the tools are available.
+
+- More tools coming!
+</script></section><section  data-markdown><script type="text/template">
+## Links
+
+- [Mjölnir](https://github.com/matrix-org/mjolnir)
+
+- [These slides](https://yoric.github.io/fosdem2022/talk.html)
+</script></section><section  data-markdown><script type="text/template">
+# Image credits
+
+- [Mjölnir hammer](https://commons.wikimedia.org/wiki/File:Mjolnir_Hamar_Svart_02-page-001.jpg) Wikipedia user Peter.marino, CC-BY-SA-4.0.</script></section></div>
+    </div>
+
+    <script src="./dist/reveal.js"></script>
+
+    <script src="./plugin/markdown/markdown.js"></script>
+    <script src="./plugin/highlight/highlight.js"></script>
+    <script src="./plugin/zoom/zoom.js"></script>
+    <script src="./plugin/notes/notes.js"></script>
+    <script src="./plugin/math/math.js"></script>
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath
+        ]
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {}, queryOptions);
+    </script>
+
+
+    <script>
+      Reveal.initialize(options);
+    </script>
   </body>
 </html>
