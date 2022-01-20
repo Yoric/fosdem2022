@@ -1,6 +1,6 @@
 # All about Moderation
 
-## Everything you've ever wanted to know about moderation in Matrix but never dared ask
+Yoric (aka David Teller), Tech Lead@Element.
 
 Note:
 Hi, I'm Yoric, aka David. I'm tech lead for moderation tools
@@ -410,6 +410,8 @@ by keywords, etc.
 
 ## Conclusions
 
+
+These slides are available at https://yoric.github.io/fosdem2022/
 
 ---
 
