@@ -156,9 +156,9 @@ perform specific actions - and more precisely, to send specific messages.
     "reason": "Not on my watch, you're not.",
     "membership": "leave",
     "avatar_url": "mxc://localhost:9999/POKmwjKQknFrMBhtHZMPgqrt",
-    "displayname": "bob"
+    "displayname": "marvin"
   },
-  "state_key": "@bob:localhost:9999",
+  "state_key": "@marvin:localhost:8888",
   "origin_server_ts": 1642608702256,
   "room_id": "!lMJWVxQoCUKBVMspVO:localhost:9999",
   // ...
@@ -182,7 +182,7 @@ perform specific actions - and more precisely, to send specific messages.
 ```jsonc
 {
   "type": "m.room.message",
-  "sender": "@bob:localhost:9999",
+  "sender": "@marvin:localhost:8888",
   "unsigned": {
     "redacted_because": {
       "type": "m.room.redaction",
@@ -215,6 +215,7 @@ this is a `m.redact` event.
 {
   "type": "m.room.message",
   "sender": "@bob:localhost:9999",
+  "content": { },
   "unsigned": {
     "age": 61,
     "redacted_because": {
@@ -335,7 +336,7 @@ why we have shadowban.
     "reason": "Could someone do something about this spambot?",
     "room_id": "!ERAgBpSOcCCuTJqQPk:matrix.org",
     "sender": "@clara:localhost:9999",
-    "user_id": "@marvin:matrix.org",
+    "user_id": "@marvin:localhost:8888",
     "received_ts": 1570897107409,
     // ...
 },
@@ -374,8 +375,9 @@ by keywords, etc.
 2. Create a moderation room.
 3. Invite Mjölnir to the moderation room.
 4. Invite Mjölnir to your community rooms.
-5. Optionally, make Mjölnir Admin.
-6. Optionally, setup reverse proxy.
+5. Ideally, make Mjölnir admin in your community rooms.
+6. Optionally, make Mjölnir Admin.
+7. Optionally, setup reverse proxy.
 
 ---
 
@@ -438,6 +440,8 @@ by keywords, etc.
 - Moderating federated communications isn't trivial but the tools are available.
 
 - More tools coming!
+
+- Thanks!
 
 ---
 
