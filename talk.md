@@ -368,17 +368,6 @@ by keywords, etc.
 
 ---
 
-<!-- .slide: data-background-image="img/MjolnirHammer.png" data-background-size="contain" -->
-
----
-
-## Mjölnir is your ~~hammer~~ friend
-
-
-![Capture of `mjolnir help`](img/Mjolnir.png).
-
----
-
 ## Setting up Mjölnir
 
 1. Deploy Mjölnir.
@@ -387,6 +376,13 @@ by keywords, etc.
 4. Invite Mjölnir to your community rooms.
 5. Optionally, make Mjölnir Admin.
 6. Optionally, setup reverse proxy.
+
+---
+
+## Mjölnir is your ~~hammer~~ friend
+
+
+![Capture of `mjolnir help`](img/Mjolnir.png).
 
 ---
 
@@ -451,8 +447,3 @@ by keywords, etc.
 
 - [These slides](https://yoric.github.io/fosdem2022/talk.html)
 
----
-
-# Image credits
-
-- [Mjölnir hammer](https://commons.wikimedia.org/wiki/File:Mjolnir_Hamar_Svart_02-page-001.jpg) Wikipedia user Peter.marino, CC-BY-SA-4.0.
