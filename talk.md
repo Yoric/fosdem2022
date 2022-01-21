@@ -1,5 +1,9 @@
 # All about Moderation
 
+<!-- .slide: data-background-image="img/Spiro.png" data-background-size="fill" -->
+
+![Matrix logo](img/matrix-logo-white.svg)
+
 Yoric (aka David Teller), Tech Lead@Element.
 
 Note:
@@ -14,13 +18,20 @@ this presentation once again next year, it will be quite different.
 
 # What *is* Moderation?
 
-> In an internet forum, a moderator is one who enforces the *rules*.
-
+"In an internet forum, a moderator is one who enforces the *rules*."
 (source: Wikipedia)
 
 > Matrix itself doesn't know about rules. <!-- .element: class="fragment" -->
 
 ---
+
+# Moderation scenario
+
+![Screen capture of a spambot interrupting a conversation](img/SpamAlert.png)
+
+---
+
+<!-- .slide: data-background-image="img/Spiro2.png" data-background-size="fill" -->
 
 # The program
 
@@ -131,9 +142,9 @@ perform specific actions - and more precisely, to send specific messages.
 
 ![Showing a user being kicked from a room](img/Kick.png)
 
----
-
 <!-- .slide: data-transition="convex-in" -->
+
+---
 
 ### Kick/Ban (view source)
 
@@ -142,7 +153,7 @@ perform specific actions - and more precisely, to send specific messages.
   "type": "m.room.member",
   "sender": "@alice:localhost:9999",
   "content": {
-    "reason": "Not on my turf, you're not.",
+    "reason": "Not on my watch, you're not.",
     "membership": "leave",
     "avatar_url": "mxc://localhost:9999/POKmwjKQknFrMBhtHZMPgqrt",
     "displayname": "bob"
@@ -161,9 +172,9 @@ perform specific actions - and more precisely, to send specific messages.
 
 ![Showing a redacted (deleted) message within a conversation](img/Redact.png)
 
----
-
 <!-- .slide: data-transition="convex-in" -->
+
+---
 
 ### Redact (view source)
 
@@ -194,11 +205,11 @@ Note:
 Similarly, when a moderator or a user deletes a message,
 this is a `m.redact` event.
 
+<!-- .slide: data-transition="convex-in" -->
+
 ---
 
 ### Redacted (view source)
-
-<!-- .slide: data-transition="zoom" -->
 
 ```jsonc
 {
@@ -250,6 +261,8 @@ it from their databases.
 Note: Blocks servers
 
 ---
+
+<!-- .slide: data-background-image="img/Spiro3.png" data-background-size="fill" -->
 
 # The program
 
@@ -319,10 +332,10 @@ why we have shadowban.
 ```js
 {
     "event_id": "$bNUFCwGzWca1meCGkjp-zwslF-GfVcXukvRLI1_FaVY",
-    "reason": "This user slapped me with a wet trout",
+    "reason": "Could someone do something about this spambot?",
     "room_id": "!ERAgBpSOcCCuTJqQPk:matrix.org",
-    "sender": "@foobar:matrix.org",
-    "user_id": "@foo:matrix.org",
+    "sender": "@clara:localhost:9999",
+    "user_id": "@marvin:matrix.org",
     "received_ts": 1570897107409,
     // ...
 },
@@ -344,6 +357,8 @@ by keywords, etc.
 
 ---
 
+<!-- .slide: data-background-image="img/Spiro4.png" data-background-size="fill" -->
+
 # The program
 
 1. Room moderators.
@@ -364,21 +379,34 @@ by keywords, etc.
 
 ---
 
+## Setting up Mjölnir
+
+1. Deploy Mjölnir.
+2. Create a moderation room.
+3. Invite Mjölnir to the moderation room.
+4. Invite Mjölnir to your community rooms.
+5. Optionally, make Mjölnir Admin.
+6. Optionally, setup reverse proxy.
+
+---
+
 ## What can Mjölnir do?
 
 - Moderate rooms in which it is present.
-- Create a moderation room.
 - Room protections.
 - Room policy lists (*).
 - Use the admin APIs (*).
+- Abuse Tracker.
 
 ---
 
-## One more thing
+## Abuse Tracker?
 
-![With Mjölnir, abuse reports can show up in moderation rooms!](img/AbuseReport.png)
+![With Mjölnir, abuse reports can show up in moderation rooms!](img/AbuseReportInMjolnirModerationRoom.png)
 
 ---
+
+<!-- .slide: data-background-image="img/Spiro5.png" data-background-size="fill" -->
 
 # The program
 
@@ -401,9 +429,10 @@ by keywords, etc.
 
 ## But also
 
-- Undoable redactions.
+- Two-phase moderation.
 - Customizable room protections.
 - Mjölnir UI improvements.
+- Sharing policies (aka distributed trust).
 - ...
 
 ---

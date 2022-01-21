@@ -8,14 +8,19 @@
     <link rel="shortcut icon" href="./favicon.ico" />
     <link rel="stylesheet" href="./dist/reset.css" />
     <link rel="stylesheet" href="./dist/reveal.css" />
-    <link rel="stylesheet" href="./dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="./dist/theme/night.css" id="theme" />
     <link rel="stylesheet" href="./css/highlight/zenburn.css" />
 
+    <link rel="stylesheet" href="./_assets/style.css" />
 
   </head>
   <body>
     <div class="reveal">
       <div class="slides"><section  data-markdown><script type="text/template"># All about Moderation
+
+<!-- .slide: data-background-image="img/Spiro.png" data-background-size="fill" -->
+
+![Matrix logo](img/matrix-logo-white.svg)
 
 Yoric (aka David Teller), Tech Lead@Element.
 
@@ -28,12 +33,17 @@ this presentation once again next year, it will be quite different.</p>
 </aside></script></section><section  data-markdown><script type="text/template">
 # What *is* Moderation?
 
-> In an internet forum, a moderator is one who enforces the *rules*.
-
+"In an internet forum, a moderator is one who enforces the *rules*."
 (source: Wikipedia)
 
 > Matrix itself doesn't know about rules. <!-- .element: class="fragment" -->
 </script></section><section  data-markdown><script type="text/template">
+# Moderation scenario
+
+![Screen capture of a spambot interrupting a conversation](img/SpamAlert.png)
+</script></section><section  data-markdown><script type="text/template">
+<!-- .slide: data-background-image="img/Spiro2.png" data-background-size="fill" -->
+
 # The program
 
 1. **Room moderators**.
@@ -130,9 +140,9 @@ perform specific actions - and more precisely, to send specific messages.</p>
 ## Kick/Ban
 
 ![Showing a user being kicked from a room](img/Kick.png)
-</script></section><section  data-markdown><script type="text/template">
-<!-- .slide: data-transition="convex-in" -->
 
+<!-- .slide: data-transition="convex-in" -->
+</script></section><section  data-markdown><script type="text/template">
 ### Kick/Ban (view source)
 
 ```jsonc
@@ -140,7 +150,7 @@ perform specific actions - and more precisely, to send specific messages.</p>
   "type": "m.room.member",
   "sender": "@alice:localhost:9999",
   "content": {
-    "reason": "Not on my turf, you're not.",
+    "reason": "Not on my watch, you're not.",
     "membership": "leave",
     "avatar_url": "mxc://localhost:9999/POKmwjKQknFrMBhtHZMPgqrt",
     "displayname": "bob"
@@ -156,9 +166,9 @@ perform specific actions - and more precisely, to send specific messages.</p>
 ### Redact
 
 ![Showing a redacted (deleted) message within a conversation](img/Redact.png)
-</script></section><section  data-markdown><script type="text/template">
-<!-- .slide: data-transition="convex-in" -->
 
+<!-- .slide: data-transition="convex-in" -->
+</script></section><section  data-markdown><script type="text/template">
 ### Redact (view source)
 
 
@@ -186,10 +196,8 @@ perform specific actions - and more precisely, to send specific messages.</p>
 
 <aside class="notes"><p>Similarly, when a moderator or a user deletes a message,
 this is a <code>m.redact</code> event.</p>
-</aside></script></section><section  data-markdown><script type="text/template">
+<!-- .slide: data-transition="convex-in" --></aside></script></section><section  data-markdown><script type="text/template">
 ### Redacted (view source)
-
-<!-- .slide: data-transition="zoom" -->
 
 ```jsonc
 {
@@ -237,6 +245,8 @@ it from their databases.</p>
 
 <aside class="notes"><p>Blocks servers</p>
 </aside></script></section><section  data-markdown><script type="text/template">
+<!-- .slide: data-background-image="img/Spiro3.png" data-background-size="fill" -->
+
 # The program
 
 1. Room moderators.
@@ -293,10 +303,10 @@ why we have shadowban.</p>
 ```js
 {
     "event_id": "$bNUFCwGzWca1meCGkjp-zwslF-GfVcXukvRLI1_FaVY",
-    "reason": "This user slapped me with a wet trout",
+    "reason": "Could someone do something about this spambot?",
     "room_id": "!ERAgBpSOcCCuTJqQPk:matrix.org",
-    "sender": "@foobar:matrix.org",
-    "user_id": "@foo:matrix.org",
+    "sender": "@clara:localhost:9999",
+    "user_id": "@marvin:matrix.org",
     "received_ts": 1570897107409,
     // ...
 },
@@ -313,6 +323,8 @@ by keywords, etc.
 
 > No content inspection in encrypted rooms. <!-- .element: class="fragment" -->
 </script></section><section  data-markdown><script type="text/template">
+<!-- .slide: data-background-image="img/Spiro4.png" data-background-size="fill" -->
+
 # The program
 
 1. Room moderators.
@@ -327,18 +339,29 @@ by keywords, etc.
 
 ![Capture of `mjolnir help`](img/Mjolnir.png).
 </script></section><section  data-markdown><script type="text/template">
+## Setting up Mjölnir
+
+1. Deploy Mjölnir.
+2. Create a moderation room.
+3. Invite Mjölnir to the moderation room.
+4. Invite Mjölnir to your community rooms.
+5. Optionally, make Mjölnir Admin.
+6. Optionally, setup reverse proxy.
+</script></section><section  data-markdown><script type="text/template">
 ## What can Mjölnir do?
 
 - Moderate rooms in which it is present.
-- Create a moderation room.
 - Room protections.
 - Room policy lists (*).
 - Use the admin APIs (*).
+- Abuse Tracker.
 </script></section><section  data-markdown><script type="text/template">
-## One more thing
+## Abuse Tracker?
 
-![With Mjölnir, abuse reports can show up in moderation rooms!](img/AbuseReport.png)
+![With Mjölnir, abuse reports can show up in moderation rooms!](img/AbuseReportInMjolnirModerationRoom.png)
 </script></section><section  data-markdown><script type="text/template">
+<!-- .slide: data-background-image="img/Spiro5.png" data-background-size="fill" -->
+
 # The program
 
 1. Room moderators.
@@ -354,9 +377,10 @@ by keywords, etc.
 </script></section><section  data-markdown><script type="text/template">
 ## But also
 
-- Undoable redactions.
+- Two-phase moderation.
 - Customizable room protections.
 - Mjölnir UI improvements.
+- Sharing policies (aka distributed trust).
 - ...
 </script></section><section  data-markdown><script type="text/template">
 ## Conclusions
